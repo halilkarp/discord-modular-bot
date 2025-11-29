@@ -1,0 +1,4 @@
+{
+  "intents": ["Guilds", "GuildMessages", "MessageContent"],
+  "partials": ["Message", "Channel", "Reaction"]
+}
