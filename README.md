@@ -16,17 +16,14 @@ A modular Discord bot built with Node.js and designed for scalability. The proje
 ```
 git clone https://github.com/halilkarp/discord-modular-bot.git
 cd discord-modular-bot
-
 ```
 2. Install dependencies
 ```
 npm install
-
 ```
 3. Create your .env file
 ```
 cp .env_example .env
-
 ```
 Then edit .env and fill in your values
 (you can find them at https://discord.com/developers/applications):
@@ -36,7 +33,8 @@ APPLICATION_ID=<your_application_id>
 ```
 4. Start the bot
 ```
-npm start
+npm start        # regular mode - runs once, you have to restart manually
+npm run dev      # development mode - auto-restarts on every file change
 ```
 
 # Directory Structure
