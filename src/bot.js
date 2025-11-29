@@ -1,9 +1,9 @@
+require("module-alias/register");
 const path = require("path");
 const { GatewayIntentBits, Partials } = require( "discord.js");
 const config = require("../config/config.json");
 const BotClient = require("./BotClient.js");
-global.APP_ROOT = path.join(__dirname, "..");
-const db = require("./core/db.js");
+const db = require("@db");
 require("dotenv").config();
 function getIntents(intentNames)
 {

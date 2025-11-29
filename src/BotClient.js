@@ -15,7 +15,7 @@ const loadCommands = require("./loaders/CommandLoader.js");
     this.commands = new Collection();
     this.cooldowns = new Map();
     }
-    start(){
+     start(){
         loadEvents(this);
         loadCommands(this);
         this.login(process.env.BOT_TOKEN);

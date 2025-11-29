@@ -1,7 +1,7 @@
 const {SlashCommandBuilder, MessageFlags} = require("discord.js");
 const path = require("path");
-const {checkOperatorship} = require (path.join(__dirname, "../auth/checkOperatorship.js"));
-const db = require("../../../core/db.js");
+const {checkOperatorship} = require ("../auth/checkOperatorship.js");
+const db = require("@db");
 async function getTarget(interaction)
 {
 

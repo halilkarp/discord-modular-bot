@@ -1,5 +1,5 @@
 const path = require("path");
-const db = require(path.join(APP_ROOT, "src/modules/shared/db.js"));
+const db = require("@db");
 
 const VALID_TABLES = ["deniedUsers", "deniedTargets"];
 function entryExists(table, userID, guildID)

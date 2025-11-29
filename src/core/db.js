@@ -1,9 +1,9 @@
 const Database = require('better-sqlite3');
 const path = require("path");
 const fs = require("fs");
-const dbPath = path.join(APP_ROOT, "src/database/app.sqlite");
+const dbPath = path.join(__dirname,"../database/app.sqlite");
 const db = new Database(dbPath);
-const schemaDir = path.join(APP_ROOT, "src/database/schemas");
+const schemaDir = path.join(__dirname, "../database/schemas");
 const MIGRATION_TABLE_CHECK =
   "SELECT name FROM sqlite_master WHERE type='table' AND name='migrations';";
 

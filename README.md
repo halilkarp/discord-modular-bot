@@ -35,10 +35,10 @@ cp .env_example .env
 ```
 Then edit .env and fill in your values
 (you can find them at https://discord.com/developers/applications):
-
+```
 BOT_TOKEN=<your_discord_bot_token>
 APPLICATION_ID=<your_application_id>
-
+'''
  4. Start the bot
 ```
 
