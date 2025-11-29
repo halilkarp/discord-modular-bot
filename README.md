@@ -12,24 +12,19 @@ A modular Discord bot built with Node.js and designed for scalability. The proje
 ---
 
 ## Setup
-
 1. Clone the repository
-
 ```
 git clone https://github.com/halilkarp/discord-modular-bot.git
 cd discord-modular-bot
 
 ```
-
 2. Install dependencies
 ```
 npm install
 
 ```
-
 3. Create your .env file
 ```
-
 cp .env_example .env
 
 ```
@@ -38,18 +33,15 @@ Then edit .env and fill in your values
 ```
 BOT_TOKEN=<your_discord_bot_token>
 APPLICATION_ID=<your_application_id>
-'''
- 4. Start the bot
 ```
-
+4. Start the bot
+```
 npm start
-
 ```
 
 # Directory Structure
 
 ```
-
 src/
 ├── bot.js             # Entry point
 ├── BotClient.js       # Discord.js client wrapper
@@ -60,7 +52,6 @@ src/
 ├── loaders/           # Dynamic loaders (commands, events, etc.)
 └── modules/           # Self-contained bot modules
     └── impersonation/ # Example module
-
 ```
 
 
