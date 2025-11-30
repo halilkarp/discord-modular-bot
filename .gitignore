@@ -1,8 +1,7 @@
 node_modules/
-.git
 .env
 .env.*
 .vscode
 *.swp
-.README.*
-src/database/*.sqlite
+*.swo
+app.sqlite

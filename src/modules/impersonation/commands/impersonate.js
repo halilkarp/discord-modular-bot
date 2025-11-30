@@ -1,7 +1,5 @@
-const path = require("path");
-const {SlashCommandBuilder, MessageFlags} = require("discord.js");
-const {isDeniedUser, isDeniedImpersonation} = require (path.join(__dirname, "../auth/commandAuthorization.js"));
-const sendMessage = require (path.join(__dirname, "../logic/webhook.js"));
+const {SlashCommandBuilder} = require("discord.js");
+const {webhook, rules} = require ("@modules/impersonation");
 module.exports = {
     name: "impersonate",
     description: "Impersonate someone",
@@ -11,7 +9,7 @@ module.exports = {
     async execute(client, interaction)
     {
 	console.log("bruuu");
-	const isDenied = await isDeniedUser(interaction.user.id, interaction.guildId);
+	const isDenied = await rules.isDeniedUser(interaction.user.id, interaction.guildId);
 
 	await interaction.deferReply({ephemeral: true});
 	if(isDenied){
@@ -24,7 +22,7 @@ module.exports = {
 	const target = interaction.options.getMentionable("username");
 	// Default to the author user object if no argument is given
 	const user = target ? target : interaction.user
-	if( isDeniedImpersonation(user.id, interaction.guildId)&& user.id != interaction.user.id)
+	if(await rules.isDeniedTarget(user.id, interaction.guildId)&& user.id != interaction.user.id)
 	{
 	    await interaction.followUp(({
 		content: "Can't impersonate this person"
@@ -32,8 +30,9 @@ module.exports = {
 	    return;
 	}
 	const text = interaction.options.getString("text");
-	await sendMessage(text, target, interaction.channel);
+	await webhook.sendMessage(text, target, interaction.channel);
 	await interaction.deleteReply();
 
 }
 }
+

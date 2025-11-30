@@ -1,8 +1,7 @@
-const path = require("path");
 const db = require("@db");
 
 const VALID_TABLES = ["deniedUsers", "deniedTargets"];
-function entryExists(table, userID, guildID)
+function existsInTable(table, userID, guildID)
 {
    if(!VALID_TABLES.includes(table)) throw new Error("Invalid table name");
     //Check if the user is in the given table
@@ -10,12 +9,11 @@ function entryExists(table, userID, guildID)
 }
 
   function isDeniedUser(userID, guildID) {
-    return entryExists("deniedUsers", userID, guildID);
+    return existsInTable("deniedUsers", userID, guildID);
 
 }
-     function isDeniedImpersonation(userID, guildID)
+function isDeniedTarget(userID, guildID)
 {
-
-	return entryExists("deniedTargets", userID, guildID);
+    return existsInTable("deniedTargets", userID, guildID);
 }
-module.exports =  {isDeniedUser, isDeniedImpersonation};
+module.exports =  {isDeniedUser, isDeniedTarget};
