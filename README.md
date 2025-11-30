@@ -37,20 +37,54 @@ npm start        # regular mode - runs once, you have to restart manually
 npm run dev      # development mode - auto-restarts on every file change
 ```
 
+
 # Directory Structure
 
 ```
-src/
-├── bot.js             # Entry point
-├── BotClient.js       # Discord.js client wrapper
-├── core/              # Infrastructure layer (e.g., database)
-│   └── db.js
-├── database/          # SQLite file and SQL migrations
-├── events/            # Event handlers
-├── loaders/           # Dynamic loaders (commands, events, etc.)
-└── modules/           # Self-contained bot modules
-    └── impersonation/ # Example module
+discord-modular-bot
+├── config/
+│   └── config.json
+│
+├── src/
+│   ├── bot.js                 # Entry point
+│   ├── BotClient.js           # Extended Discord.js client
+│   │
+│   ├── core/                  # Shared utilities across modules
+│   │   ├── db.js              # SQLite connection 
+│   │   └── checkOperatorship.js  # Operator/owner permission check
+│   │
+│   ├── database/
+│   │   ├── app.sqlite         # SQLite database 
+│   │   └── schemas/           # SQL migrations
+│   │       ├── 001-init.sql
+│   │       ├── 002-deniedUsers.sql
+│       │   ├── 003-deniedTargets.sql
+│       │   └── 004-operators.sql
+│   │
+│   ├── events/                # Discord client events
+│   │   ├── clientReady.js
+│   │   └── interactionCreate.js
+│   │
+│   ├── loaders/               # Startup logic
+│   │   ├── CommandLoader.js   # Loads commands from feature modules
+│   │   ├── EventLoader.js     # Loads event handlers
+│   │   └── RegisterCommands.js # Registers slash commands with Discord API
+│   │
+│   └── modules/
+│       └── impersonation/     # Feature module
+│
 ```
+# Module Structure
+```
+
+Commands are grouped into self-contained feature modules. Each module
+contains its own commands and logic, and exposes a public API through
+`index.js`. This allows commands to consume module functionality without
+knowing internal file paths.
+
+Example: `src/modules/impersonation`
+
+``
 
 
 Each module contains its own logic, commands, and authorization rules, making new features easy to add without modifying core code.
