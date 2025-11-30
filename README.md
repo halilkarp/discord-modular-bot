@@ -84,10 +84,8 @@ knowing internal file paths.
 
 Example: `src/modules/impersonation`
 
-``
-
-
 Each module contains its own logic, commands, and authorization rules, making new features easy to add without modifying core code.
+```
 
 ## Status
 
