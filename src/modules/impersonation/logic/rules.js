@@ -1,19 +1,18 @@
 const db = require("@db");
+const {POLICY} = require ("../constants");
 
-const VALID_TABLES = ["deniedUsers", "deniedTargets"];
-function existsInTable(table, userID, guildID)
-{
-   if(!VALID_TABLES.includes(table)) throw new Error("Invalid table name");
-    //Check if the user is in the given table
-    return  db.prepare(`SELECT 1 FROM ${table} WHERE userID= ? AND guildID = ?  LIMIT 1;`).get(userID, guildID) !== undefined;
+function hasPolicy(userID, guildID, policyType) {
+    return db.prepare(`
+        SELECT 1 FROM impersonationPolicies
+        WHERE userID = ? AND guildID = ? AND policyType = ?
+        LIMIT 1
+    `).get(userID, guildID, policyType) !== undefined;
 }
 
-  function isDeniedUser(userID, guildID) {
-    return existsInTable("deniedUsers", userID, guildID);
+const isBlocked = (userID, guildID) =>
+    hasPolicy(userID, guildID, POLICY.BLOCKED);
 
-}
-function isDeniedTarget(userID, guildID)
-{
-    return existsInTable("deniedTargets", userID, guildID);
-}
-module.exports =  {isDeniedUser, isDeniedTarget};
+const isProtected = (userID, guildID) =>
+    hasPolicy(userID, guildID, POLICY.PROTECTED);
+
+module.exports = { isBlocked, isProtected, hasPolicy};

@@ -23,8 +23,7 @@
   "@modules": "src/modules",
   "@loaders": "src/loaders",
   "@events": "src/events",
-  "@db": "src/core/db.js",
-  "@schemas": "src/database/schemas"
+  "@db": "src/core/db.js"
 }
 
 }

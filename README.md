@@ -2,12 +2,21 @@
 
 A modular Discord bot built with Node.js and designed for scalability. The project emphasizes clean architecture, clear separation of concerns, and runtime-loadable modules.
 
-## Features
+# Features
 
 - SQLite-based persistence with migration support
 - Modular command and feature loading
 - Support for slash commands
 - Impersonation module (first implemented module; more features coming soon)
+### Impersonation Module
+
+Provides a controlled impersonation system with:
+
+- `/impersonate` — impersonate a user
+- `/impctl` — add/remove access or protection rules
+  - blocked → user cannot use impersonation
+  - protected → user cannot be impersonated
+
 
 ---
 
@@ -46,41 +55,55 @@ discord-modular-bot
 │   └── config.json
 │
 ├── src/
-│   ├── bot.js                 # Entry point
-│   ├── BotClient.js           # Extended Discord.js client
+│   ├── bot.js                      # Entry point
+│   ├── BotClient.js                # Extended Discord.js client
 │   │
-│   ├── core/                  # Shared utilities across modules
-│   │   ├── db.js              # SQLite connection 
-│   │   └── checkOperatorship.js  # Operator/owner permission check
+│   ├── core/                       # Global infrastructure (NOT a module)
+│   │   ├── db.js                   # SQLite connection + schema hashing
+│   │   └── checkOperatorship.js    # Operator/role permission check
 │   │
 │   ├── database/
-│   │   ├── app.sqlite         # SQLite database 
-│   │   └── schemas/           # SQL migrations
-│   │       ├── 001-init.sql
-│   │       ├── 002-deniedUsers.sql
-│       │   ├── 003-deniedTargets.sql
-│       │   └── 004-operators.sql
+│   │   └── app.sqlite              # Persistent database (no schema folder anymore)
 │   │
-│   ├── events/                # Discord client events
+│   ├── events/                     # Discord event handlers
 │   │   ├── clientReady.js
 │   │   └── interactionCreate.js
 │   │
-│   ├── loaders/               # Startup logic
-│   │   ├── CommandLoader.js   # Loads commands from feature modules
-│   │   ├── EventLoader.js     # Loads event handlers
-│   │   └── RegisterCommands.js # Registers slash commands with Discord API
+│   ├── loaders/                    # Runtime initialization
+│   │   ├── CommandLoader.js        # Discovers / loads commands from modules
+│   │   ├── EventLoader.js          # Loads event handlers
+│   │   └── RegisterCommands.js     # Registers slash commands with Discord API
 │   │
-│   └── modules/
-│       └── impersonation/     # Feature module
+│   └── modules/                    # Independent feature modules
+│       └── impersonation/          # Impersonation feature module
+│           ├── schema.sql          # database schema
+│           ├── constants.js        # enums
+│           ├── index.js            # Module export aggregator
+│           │
+│           ├── commands/           # Slash commands for this module
+│           │   ├── impersonate.js
+│           │   └── impersonate-control.js
+│           │
+│           └── logic/              # Internal logic
+│               ├── access.js       # Mutation API (add/remove policies)
+│               ├── rules.js        # Query API 
+│               ├── payload.js      # Webhook message payload creator
+│               └── webhook.js      # Webhook impersonation sender
+│
 │
 ```
 # Module Structure
 ```
+This bot uses a module-based design. Each module can contain:
 
-Commands are grouped into self-contained feature modules. Each module
-contains its own commands and logic, and exposes a public API through
-`index.js`. This allows commands to consume module functionality without
-knowing internal file paths.
+- commands/ → Slash commands belonging to the module
+- logic/  → Internal helpers, rules and service functions
+- constants.js  → Shared values (enums, policy types, etc.)
+- schema.sql → Module-scoped database schema
+
+On startup, the bot hashes each `schema.sql` and applies it only if changed.  
+This makes database migrations fully incremental without manual scripts.
+
 
 Example: `src/modules/impersonation`
 
@@ -89,9 +112,10 @@ Each module contains its own logic, commands, and authorization rules, making ne
 
 ## Status
 
--Actively developed. More modules and examples will be added.
+Actively developed. More modules and examples will be added.
 
 
 # License
 
 This project is licensed under the [GNU GPLv3](https://github.com/halilkarp/discord-modular-bot/blob/main/LICENSE).
+

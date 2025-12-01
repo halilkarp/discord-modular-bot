@@ -3,35 +3,39 @@ const path = require("path");
 const fs = require("fs");
 const dbPath = path.join(__dirname,"../database/app.sqlite");
 const db = new Database(dbPath);
-const schemaDir = path.join(__dirname, "../database/schemas");
-const MIGRATION_TABLE_CHECK =
-  "SELECT name FROM sqlite_master WHERE type='table' AND name='migrations';";
+const crypto = require("crypto");
 
-const SELECT_MIGRATIONS =
-  "SELECT name FROM migrations";
+console.log("Initializing the bot database.")
+db.exec(`CREATE TABLE IF NOT EXISTS migrations (
+    moduleName TEXT NOT NULL, 
+    hash TEXT NOT NULL,
+    applied_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (moduleName));`);  
 
-const INSERT_MIGRATION =
-  "INSERT INTO migrations (name) VALUES (?)";
-  const tableExists  = db.prepare(MIGRATION_TABLE_CHECK).get() != null
-
-if(!tableExists)
+function generateHash(content)
 {
-    console.log("Initializing the bot database.")
-    db.exec(fs.readFileSync(path.join(schemaDir, "001-init.sql"), "utf8"));
-    db.prepare(INSERT_MIGRATION).run("001-init.sql");
+  return crypto.createHash("sha256").update(content,"utf-8").digest("hex");
+}
+function applySchema(moduleName, schemaPath)
+{
+  const sql = fs.readFileSync(schemaPath,"utf-8")
+  const hash = generateHash(sql);
+  const exists = db.prepare("SELECT hash FROM migrations WHERE moduleName = ?").get(moduleName);
+  if(exists && exists.hash == hash) return; //schema unchanged
+
+  db.exec(sql);
+  db.prepare("INSERT OR REPLACE INTO migrations (moduleName, hash) VALUES (?, ?) ").run(moduleName, hash)
+  console.log(`Applied the schema for the ${moduleName} module.`)
+}
+
+const modulesPath = path.join(__dirname,"../modules");
+for(const moduleName of fs.readdirSync(modulesPath))
+{
+  const modulePath = path.join(modulesPath, moduleName);
+  const schema = path.join(modulePath, "schema.sql");
+  if(fs.existsSync(schema))
+    applySchema(moduleName, schema);
 }
 
 
-const schemas = db.prepare(SELECT_MIGRATIONS).all().map(s => s.name);
-const files = fs.readdirSync(schemaDir).filter(f=> f.endsWith(".sql"));
-
-for(const file of files)
-{
-    if(!schemas.includes(file))
-	{
-	    const sql = fs.readFileSync(path.join(schemaDir, file), "utf8");
-	    db.exec(sql);
-	    db.prepare("INSERT INTO migrations (name) VALUES (?)").run(file);
-	}
-}
 module.exports = db;    

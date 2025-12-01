@@ -1,10 +1,12 @@
 
 const webhook = require ("./logic/webhook.js");
-const access = require ("./logic/impersonatorAccess.js");
-const rules = require("./logic/impersonationRules.js");
-
+const access = require ("./logic/access.js");
+const rules = require("./logic/rules.js");
+const { POLICY, ACTIONS } = require("./constants");
 module.exports = {
     webhook,
     access,
-    rules
+    rules,
+    POLICY,
+    ACTIONS
 }
