@@ -4,4 +4,4 @@ node_modules/
 .vscode
 *.swp
 *.swo
-app.sqlite
+src/database/app.sqlite
