@@ -1,8 +1,8 @@
-const {SlashCommandBuilder, MessageFlags} = require("discord.js");
+const {SlashCommandBuilder} = require("discord.js");
 const {access,rules, POLICY, ACTIONS} = require ("@modules/impersonation");
 const {checkOperatorship} = require ("@core/checkOperatorship.js");
 
-const restoreaccess = {
+module.exports = {
     name : "impctl",
     description : "Control access to the impersonation command and who can't be impersonated",
     data : new SlashCommandBuilder().setName("impctl").setDescription("Control access to the impersonation command and who can't be impersonated").
@@ -55,5 +55,4 @@ const restoreaccess = {
       
     }
 }
- 
-module.exports = {restoreaccess};
+

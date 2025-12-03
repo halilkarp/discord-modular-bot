@@ -27,6 +27,9 @@ function applySchema(moduleName, schemaPath)
   db.prepare("INSERT OR REPLACE INTO migrations (moduleName, hash) VALUES (?, ?) ").run(moduleName, hash)
   console.log(`Applied the schema for the ${moduleName} module.`)
 }
+const coreSchema = path.join(__dirname, "schema.sql");
+if(fs.existsSync(coreSchema))
+  applySchema("core", coreSchema);
 
 const modulesPath = path.join(__dirname,"../modules");
 for(const moduleName of fs.readdirSync(modulesPath))

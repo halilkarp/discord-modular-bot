@@ -1,5 +1,6 @@
 const {SlashCommandBuilder} = require("discord.js");
 const {webhook, rules} = require ("@modules/impersonation");
+const logger = require("@core/logger.js")
 module.exports = {
     name: "impersonate",
     description: "Impersonate someone",
@@ -30,9 +31,15 @@ module.exports = {
 	    return;
 	}
 	const text = interaction.options.getString("text");
+	const targetLabel = target ? target.tag : interaction.user.tag;
 	await webhook(text, user, interaction.channel);
 	await interaction.deleteReply();
+	await logger.sendLogMessage(client,
+							interaction.guildId,
+							"impersonation",
+							`${interaction.user.tag} : ${targetLabel} : ${text}`)
 
+	
 }
 }
 
