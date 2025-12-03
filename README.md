@@ -16,6 +16,7 @@ A modular Discord bot built with Node.js and designed for scalability. The proje
 Provides a controlled impersonation system with:
 
 - `/impersonate` — impersonate a user
+<img src="https://i.imgur.com/FF3Bgj4.gif"/>
 - `/impctl` — add/remove access or protection rules
   - `blocked` → user cannot use impersonation
   - `protected` → user cannot be impersonated
@@ -74,7 +75,7 @@ APPLICATION_ID=<your_application_id>
 4. Start the bot
 ```
 npm start        # regular mode - runs once, you have to restart manually
-npm run dev      # development mode - auto-restarts on every file change
+npm run dev      # development mode hot reload- auto-restarts on every file change
 ```
 
 
