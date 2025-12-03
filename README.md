@@ -17,6 +17,7 @@ Provides a controlled impersonation system with:
 
 - `/impersonate` — impersonate a user
 <img src="https://i.imgur.com/FF3Bgj4.gif"/>
+
 - `/impctl` — add/remove access or protection rules
   - `blocked` → user cannot use impersonation
   - `protected` → user cannot be impersonated
