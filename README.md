@@ -37,7 +37,7 @@ Provides runtime configuration for modules:
   - `module` → one of the available module names
   - `role` → target log channel (required for `"set"`)
   
-This command writes log channel configuration to the database. Other modules (like `impersonation`) use this configuration through the core logger.
+These commands write log channel/operator configuration to the database. Other modules (like `impersonation`) use this configuration through the core logger.
 
 ## Logging System
 
