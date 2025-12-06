@@ -32,6 +32,11 @@ Provides runtime configuration for modules:
   - `module` → one of the available module names
   - `channel` → target log channel (required for `"set"`)
 
+- `/operators` — Add/remove an operator for a given module
+  - `action` → `"add"` or `"remove"`
+  - `module` → one of the available module names
+  - `role` → target log channel (required for `"set"`)
+  
 This command writes log channel configuration to the database. Other modules (like `impersonation`) use this configuration through the core logger.
 
 ## Logging System
@@ -44,12 +49,10 @@ Logging is handled as a concern in `src/core`:
 Example usage in the impersonation command:
 
 ```
-await logger.sendLogMessage(
-  client,
-  interaction.guildId,
-  "impersonation",
-  `${interaction.user.username} : ${targetLabel} : ${text}`
-);
+  await logger.sendLogMessage(interaction.user,
+    interaction.guildId,
+    "impersonation",
+     {customEmbeds : [embed] } -- allows for custom embeds or a default one if left empty
 
 ```
 If no log channel is set for a module/guild, the logger fails gracefully and prints a warning instead of breaking the command.
@@ -92,47 +95,56 @@ discord-modular-bot
 │   ├── BotClient.js                # Extended Discord.js client
 │   │
 │   ├── core/                       # Global infrastructure (NOT a module)
-│   │   ├── db.js                   # SQLite connection
-│   │   ├── schema.sql              # Core schema (migrations table etc.)
-│   │   ├── checkOperatorship.js    # Operator/role permission check
+│   │   ├── db.js                   # better-sqlite3 connection + migration system
+│   │   ├── schema.sql              # Core migrations table
+│   │   ├── checkOperatorship.js    # Global operator permission check
+│   │   ├── operatorConfig.js       # Operator persistence (add/remove/get)
 │   │   ├── logConfig.js            # Per-module log channel persistence
-│   │   └── logger.js               # Sends log messages using logConfig
+│   │   └── logger.js               # Unified logger → moduleLog event
 │   │
 │   ├── database/
-│   │   └── app.sqlite              # Persistent database
+│   │   └── app.sqlite              # SQLite database
 │   │
-│   ├── events/                     # Discord event handlers
+│   ├── events/
 │   │   ├── clientReady.js
-│   │   └── interactionCreate.js
+│   │   ├── interactionCreate.js
+│   │   └── moduleLog.js            # New: centralized module-specific logging
 │   │
-│   ├── loaders/                    # Runtime initialization
-│   │   ├── CommandLoader.js        # Discovers / loads commands from modules
-│   │   ├── EventLoader.js          # Loads event handlers
-│   │   └── RegisterCommands.js     # Registers slash commands with Discord API
+│   ├── loaders/
+│   │   ├── CommandLoader.js        # Auto-discovers commands from all modules
+│   │   ├── EventLoader.js          # Loads all events
+│   │   └── RegisterCommands.js     # Bulk registers slash commands
 │   │
-│   └── modules/                    # Independent feature/configuration modules
-│       ├── index.js                # Module registry (exports module list etc.)
-│       │
-│       ├── impersonation/          # Impersonation feature module
-│       │   ├── schema.sql          # Module-scoped database schema
-│       │   ├── constants.js        # Policy enums (BLOCKED / PROTECTED / etc.)
-│       │   ├── index.js            # Module export aggregator
+│   └── modules/                    # Runtime-loadable, independent modules
+│       └── index.js                # Module registry & metadata
+│
+│       ├── impersonation/          # Feature module
+│       │   ├── schema.sql
+│       │   ├── constants.js        # BLOCKED / PROTECTED policies
+│       │   ├── index.js            # Exports { commands, logic, constants }
 │       │   │
-│       │   ├── commands/           # Slash commands for this module
-│       │   │   ├── impersonate.js          # /impersonate
-│       │   │   └── impersonate-control.js  # /impctl – manage policies
+│       │   ├── commands/
+│       │   │   ├── impersonate.js  # /impersonate
+│       │   │   └── control.js      # /impctl
 │       │   │
-│       │   └── logic/              # Internal logic
-│       │       ├── access.js       # Mutation API (add/remove policies)
-│       │       ├── rules.js        # Query API (isBlocked/isProtected)
-│       │       ├── payload.js      # Webhook message payload creator
-│       │       └── webhook.js      # Webhook impersonation sender
+│       │   └── logic/
+│       │       ├── access.js       # add/remove policies
+│       │       ├── rules.js        # isBlocked / isProtected
+│       │       ├── embed.js        # Log embed builder
+│       │       ├── payload.js      # Webhook payload
+│       │       └── webhook.js      # Sends via webhook
 │       │
-│       └── modulectl/              # Module configuration/control module
-│           ├── index.js
+│       └── modulectl/              # Configuration module
+│           ├── constants.js        # HANDLERS, MODULE_SETTING, etc.
+│           ├── index.js            # Exports commands + HANDLERS
+│           │
 │           ├── commands/
-│           │   └── logchannel.js   # /logchannel set|unset <module> [channel]
-│           └── logic/              # (reserved for future config helpers)
+│           │   ├── logchannel.js   # /logchannel set|unset
+│           │   └── operators.js    # /operator add|remove
+│           │
+│           └── logic/
+│               ├── access.js       # add/remove wrapper
+│               └── rules.js        #  query wrapper
 
 ```
 # Module Structure
