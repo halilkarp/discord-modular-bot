@@ -11,11 +11,11 @@ async function getWebhook(channel)
     return webhooks.first()
 }
 
-module.exports = async function sendMessage(message, user, channel)
+module.exports = async function sendMessage(message, user, channel, attachment = null)
 {
     try{
     const webhook = await getWebhook(channel);
-    webhook.send(createPayload(message, user));
+    webhook.send(createPayload(message, user, attachment));
     }catch(err){ console.log(err.message)}
 }
 

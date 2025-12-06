@@ -10,6 +10,11 @@ function getLogChannel(moduleName, guildID)
         return row  ? row.channelID : null
 }
 
+function isLogChannel(channelID, moduleName, guildID)
+{
+       return getLogChannel(moduleName, guildID) === channelID;
+}
+
 function setLogChannel(channelID, moduleName, guildID)
 {
     db.prepare(`INSERT INTO logChannels (channelID, moduleName, guildID) 
@@ -27,4 +32,4 @@ function unsetLogChannel(moduleName, guildID) {
         WHERE channelID = ? AND moduleName = ? AND guildID = ?
     `).run(channelId, moduleName, guildID);
 }
-module.exports = {getLogChannel, setLogChannel,  unsetLogChannel}
+module.exports = {isLogChannel, getLogChannel, setLogChannel,  unsetLogChannel}

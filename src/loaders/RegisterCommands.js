@@ -7,7 +7,6 @@ module.exports = async function RegisterCommands(client)
     for(const [guildID, guild]  of guilds)
     {
 	try{
-	    console.log(guild.id);
 	    rest.put(Routes.applicationGuildCommands(process.env.APPLICATION_ID, guild.id),
 		{
 		    body: client.commands.map(cmd=> cmd.data.toJSON())

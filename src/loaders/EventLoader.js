@@ -10,6 +10,9 @@ module.exports = (client) =>
 	    continue;
 	const eventFunc = require(path.join(eventsPath, file));
 	const eventName = file.split(".")[0];
-	client.on(eventName, (...args) => eventFunc.execute(client, ...args));
+    if(eventFunc.emitter)
+        eventFunc.emitter.on(eventName, (... args) => eventFunc.execute(client, ...args));
+    else
+	    client.on(eventName, (...args) => eventFunc.execute(client, ...args));
     }
 };

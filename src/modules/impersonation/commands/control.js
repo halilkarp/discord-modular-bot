@@ -1,6 +1,7 @@
 const {SlashCommandBuilder} = require("discord.js");
 const {access,rules, POLICY, ACTIONS} = require ("@modules/impersonation");
 const {checkOperatorship} = require ("@core/checkOperatorship.js");
+const logger = require("@core/logger.js")
 
 module.exports = {
     name : "impctl",
@@ -28,28 +29,32 @@ module.exports = {
 
         const action = interaction.options.getString("action");
         const policy = interaction.options.getString("policy");
-
+        let logMessage = "";
         if(action === ACTIONS.add)
         {
             if(await rules.hasPolicy(targetUser.id, interaction.guildId, policy)){
-                await interaction.editReply({content: `User is already ${policy.toLowerCase()}`})
+                await interaction.editReply({content: `User is already ${policy}`})
                 return;
             }
             await access.grantPolicy(targetUser.id, interaction.guildId, policy)
-            await interaction.editReply({content: `${targetUser.tag} is from now on ${policy.toLowerCase()}.`});    
-
+            await interaction.editReply({content: `${targetUser.tag} is from now on ${policy}.`});
+            logMessage = `<@${targetUser.id}> is ${policy} from now on.`
         }
 
         if(action === ACTIONS.remove)
         {
-            if(!rules.hasPolicy(targetUser.id, interaction.guildId, policy)){
-                await interaction.editReply({content: `User is already not ${policy.toLowerCase()}`})
+            if(!await rules.hasPolicy(targetUser.id, interaction.guildId, policy)){
+                await interaction.editReply({content: `User is already not ${policy}`})
                 return;
             }
            await access.revokePolicy(targetUser.id, interaction.guildId, policy)
-            await interaction.editReply({content: `${targetUser.tag} is from now on not ${policy.toLowerCase()}.`});    
+            await interaction.editReply({content: `${targetUser.tag} is from now on not ${policy}.`});    
+            logMessage = `<@${targetUser.id}> is not ${policy} anymore..`
+
 
         }
+        
+        logger.sendLogMessage(interaction.user, interaction.guildId, "impersonation",logMessage)      
 
         
       

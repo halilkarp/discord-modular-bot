@@ -1,16 +1,26 @@
 const { getLogChannel } = require("@core/logConfig");
-
-async function sendLogMessage(client, guildId, moduleName, message)
+const EventEmitter = require("events");
+const logEmitter = new EventEmitter();
+async function sendLogMessage(author, guildId, moduleName, options = {})
 {   const channelId = getLogChannel(moduleName, guildId)
+    const  {
+        content = "",
+        customEmbeds = [],
+        files = [],
+    } = typeof options === "string" ? {content : options} : options
     if(!channelId)
         return console.warn(`Log channel not configured for ${moduleName}`);
-    const channel = await client.channels.fetch(channelId).catch(() => null);
-    if(!channel)
-    {
-          console.warn(`Failed to get log channel ${channelId}`);
-        return;
-    }
-    await channel.send(message);
+    logEmitter.emit("moduleLog",
+        {
+            author,
+            channelId,
+            content,
+            customEmbeds,
+            moduleName,
+            files,
+            guildId,
+        });
+
 }
 
-module.exports = {sendLogMessage }
+module.exports = {sendLogMessage, logEmitter }

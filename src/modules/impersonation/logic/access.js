@@ -1,5 +1,4 @@
 const db = require("@db");
-const {POLICY} = require ("@modules/impersonation");
 
 async function grantPolicy(userID, guildID, type) {
     db.prepare(`
