@@ -8,11 +8,7 @@ function isNotEmpty(moduleName, guildID, setting)
 {
     return HANDLERS[setting]?.get(moduleName, guildID) !== null
 }
-function get(moduleName, guildID, setting)
-{
-    return HANDLERS[setting?.get(moduleName, guildID)];
-}
 
 
 
-module.exports = {existsInTable, isNotEmpty, get}
+module.exports = {existsInTable, isNotEmpty}

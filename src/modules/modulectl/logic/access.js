@@ -12,5 +12,10 @@ function remove(entityId, moduleName, guildId, setting)
     HANDLERS[setting]?.remove(entityId, moduleName, guildId);
 }
 
+function get(moduleName, guildID, setting)
+{
+    return HANDLERS[setting?.get(moduleName, guildID)];
+}
 
-module.exports= {add, remove}
+
+module.exports= {add, remove, get}
