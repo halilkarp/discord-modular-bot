@@ -1,6 +1,7 @@
  discord-modular-bot
 
-A modular Discord bot built with Node.js and designed for scalability. The project emphasizes clean architecture, clear separation of concerns, and runtime-loadable modules.
+A modular Discord bot built with Node.js and designed for scalability. The project emphasizes clean architecture, strict separation of concerns, and runtime-loadable modules.
+Every feature is isolated inside its own module. No core edits required.
 
 # Features
 
@@ -8,7 +9,9 @@ A modular Discord bot built with Node.js and designed for scalability. The proje
 - Modular command and feature loading
 - Support for slash commands
 - Per-module log channels configurable at runtime
-- Impersonation module (first feature module; more coming)
+- Operator role system for per-module permission control
+- Impersonation module (first major feature module)
+- Random/Pools module —  feature module to post randomly from text pools
 - Module control (`modulectl`) module for runtime configuration
 
 ### Impersonation Module
@@ -23,6 +26,32 @@ Provides a controlled impersonation system with:
   - `protected` → user cannot be impersonated
 
 All impersonation actions are logged to the configured log channel for the `impersonation` module in that guild (if set).
+### Random Module (NEW)
+A fully modular randomizer system that allows creating text pools, modifying them, and posting random unseen items.
+
+#### Commands
+ - `/roll poolname` — Posts a random item from the specified pool.
+
+ Items cycle: once all items have been seen, the module resets and starts over.
+ Only unseen items are returned until exhausted.
+
+- `/roll list` — Shows all available pools in the guild.
+#### /rollctl — Administration commands
+- `/rollctl create` - Create a new pool from a .txt attachment.
+```
+pool: <name>
+attachment: <text file containing lines>
+
+```
+- ##### Each line becomes a pool entry. Duplicates are automatically rejected.
+- `/rollctl modify` - Add or remove entries from an existing pool.
+```
+pool: <name>
+action: add | remove
+entry: <text or sentence>
+```
+
+
 ### Module Control (`modulectl`) Module
 
 Provides runtime configuration for modules:
@@ -37,22 +66,25 @@ Provides runtime configuration for modules:
   - `module` → one of the available module names
   - `role` → target log channel (required for `"set"`)
   
-These commands write log channel/operator configuration to the database. Other modules (like `impersonation`) use this configuration through the core logger.
+This command writes log channel configuration to the database. Other modules (like `impersonation`) use this configuration through the core logger.
 
 ## Logging System
 
-Logging is handled as a concern in `src/core`:
+Logging is handled centrally in src/core:
 
-- `core/logConfig.js` — stores and retrieves module log channel mappings in SQLite
-- `core/logger.js` — takes a module name + guild and sends log messages to the configured channel
+- core/logConfig.js — stores module → channel mapping
 
-Example usage in the impersonation command:
+- core/logger.js — unified interface for sending logs
+
+- events/moduleLog.js — dispatches log events to the correct channels
+
+Modules call it like:
 
 ```
   await logger.sendLogMessage(interaction.user,
     interaction.guildId,
     "impersonation",
-     {customEmbeds : [embed] } -- allows for custom embeds or a default one if left empty
+     {customEmbeds : [embed] } // allows for custom embeds or a default one if left empty
 
 ```
 If no log channel is set for a module/guild, the logger fails gracefully and prints a warning instead of breaking the command.
@@ -93,75 +125,83 @@ discord-modular-bot
 ├── src/
 │   ├── bot.js                      # Entry point
 │   ├── BotClient.js                # Extended Discord.js client
-│   │
-│   ├── core/                       # Global infrastructure (NOT a module)
-│   │   ├── db.js                   # better-sqlite3 connection + migration system
+│
+│   ├── core/
+│   │   ├── db.js                   # SQLite connection + migration system
 │   │   ├── schema.sql              # Core migrations table
-│   │   ├── checkOperatorship.js    # Global operator permission check
-│   │   ├── operatorConfig.js       # Operator persistence (add/remove/get)
-│   │   ├── logConfig.js            # Per-module log channel persistence
-│   │   └── logger.js               # Unified logger → moduleLog event
-│   │
-│   ├── database/
-│   │   └── app.sqlite              # SQLite database
-│   │
+│   │   ├── operatorConfig.js
+│   │   ├── checkOperatorship.js
+│   │   ├── logConfig.js
+│   │   └── logger.js
+│
 │   ├── events/
 │   │   ├── clientReady.js
 │   │   ├── interactionCreate.js
-│   │   └── moduleLog.js            # New: centralized module-specific logging
-│   │
-│   ├── loaders/
-│   │   ├── CommandLoader.js        # Auto-discovers commands from all modules
-│   │   ├── EventLoader.js          # Loads all events
-│   │   └── RegisterCommands.js     # Bulk registers slash commands
-│   │
-│   └── modules/                    # Runtime-loadable, independent modules
-│       └── index.js                # Module registry & metadata
+│   │   └── moduleLog.js
 │
-│       ├── impersonation/          # Feature module
+│   ├── loaders/
+│   │   ├── CommandLoader.js
+│   │   ├── EventLoader.js
+│   │   └── RegisterCommands.js
+│
+│   └── modules/
+│       ├── index.js                # Module registry
+│
+│       ├── impersonation/
 │       │   ├── schema.sql
-│       │   ├── constants.js        # BLOCKED / PROTECTED policies
-│       │   ├── index.js            # Exports { commands, logic, constants }
-│       │   │
+│       │   ├── constants.js
+│       │   ├── index.js
 │       │   ├── commands/
-│       │   │   ├── impersonate.js  # /impersonate
-│       │   │   └── control.js      # /impctl
-│       │   │
+│       │   │   ├── impersonate.js
+│       │   │   └── control.js
 │       │   └── logic/
-│       │       ├── access.js       # add/remove policies
-│       │       ├── rules.js        # isBlocked / isProtected
-│       │       ├── embed.js        # Log embed builder
-│       │       ├── payload.js      # Webhook payload
-│       │       └── webhook.js      # Sends via webhook
-│       │
-│       └── modulectl/              # Configuration module
-│           ├── constants.js        # HANDLERS, MODULE_SETTING, etc.
-│           ├── index.js            # Exports commands + HANDLERS
-│           │
+│       │       ├── access.js
+│       │       ├── rules.js
+│       │       ├── embed.js
+│       │       ├── payload.js
+│       │       └── webhook.js
+│
+│       ├── modulectl/
+│       │   ├── constants.js
+│       │   ├── index.js
+│       │   ├── commands/
+│       │   │   ├── logchannel.js
+│       │   │   └── operators.js
+│       │   └── logic/
+│       │       ├── access.js
+│       │       └── rules.js
+│
+│       └── random/                 
+│           ├── schema.sql
+│           ├── index.js
 │           ├── commands/
-│           │   ├── logchannel.js   # /logchannel set|unset
-│           │   └── operators.js    # /operator add|remove
-│           │
+│           │   ├── roll.js
+│           │   └── rollctl.js
 │           └── logic/
-│               ├── access.js       # add/remove wrapper
-│               └── rules.js        #  query wrapper
+│               ├── access.js
+│               ├── rules.js
+│               └── fileToDB.js
 
 ```
 # Module Structure
 
-This bot uses a module-based design. Each module can contain:
+Each module contains:
 
-- `commands/` → Slash commands belonging to the module
-- `logic/` → Internal helpers, rules and service functions
-- `constants.js` → Shared values (enums, policy types, etc.)
-- `schema.sql` → Module-scoped database schema
+- commands/ — Slash commands
 
-Some modules implement **features** (e.g. `impersonation`), while others implement **configurations** (e.g. `modulectl` for log channels). On startup, the bot hashes each `schema.sql` and applies it only if changed, making database migrations incremental without manual scripts.
+- logic/ — Internal functions (rules/access)
 
+- schema.sql — Module-specific DB schema
+
+- constants.js — Shared values
+
+- index.js — Module entrypoint + metadata
+
+Each module contains its own logic, commands, and authorization rules, making new features easy to add without modifying core code.
 
 Example: `src/modules/impersonation`
 
-Each module contains its own logic, commands, and authorization rules, making new features easy to add without modifying core code.
+
 
 
 ## Status
