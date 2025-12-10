@@ -54,6 +54,10 @@ module.exports = {
     ),
   async execute(client, interaction) {
     await interaction.deferReply();
+     if(!checkOperatorship(interaction.member, interaction.guildId)){
+                await interaction.editReply({content: "You are not authorized to use this command."});
+                return;
+            }
     const sub = interaction.options.getSubcommand();
     const poolName = interaction.options.getString("pool");
 
