@@ -50,7 +50,11 @@ pool: <name>
 action: add | remove
 entry: <text or sentence>
 ```
-
+- `/rollctl purge` - Completely remove a pool.
+```
+pool: <name>
+pool: <name>
+```
 
 ### Module Control (`modulectl`) Module
 
