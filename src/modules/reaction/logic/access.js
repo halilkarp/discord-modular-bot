@@ -5,7 +5,7 @@ function getReaction(keyword, guildID) {
   if (rules.keywordExists(keyword, guildID))
     return db
       .prepare("SELECT emoji FROM reactions WHERE keyword = ? AND guildID = ?")
-      .get(keyword, guildID).emoji;
+      .get(keyword, guildID).emoji.toString();
   return null;
 
 }

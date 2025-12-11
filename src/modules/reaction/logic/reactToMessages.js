@@ -34,13 +34,15 @@ async function reactToMessages(message) {
 
   channel.messages.fetch({ limit: 20, cache: false }).then(async (messages) => {
     for (const msg of messages.values()) {
-      if (hasUserTarget && confirmUser(msg, splitMessage[1]))
+      if (hasUserTarget && confirmUser(msg, splitMessage[1])){
         try {
           await msg.react(reaction);
         } catch (err) {
           console.error(err.message);
         }
-      else if (msg.author.id !== authorID) {
+        continue
+      }
+      if (!hasUserTarget && msg.author.id !== authorID) {
         try {
           await msg.react(reaction);
         } catch (err) {
