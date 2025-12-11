@@ -1,5 +1,7 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { fileToDB, access } = require("../index");
+const {checkOperatorship} = require ("@core/checkOperatorship.js");
+
 module.exports = {
   name: "rollctl",
   description: "rollctl",
