@@ -6,14 +6,12 @@ function checkOperatorship(member, guildID, moduleName){
     if(member.guild.ownerId == member.id)
         return true;
     if(member.permissions.has(PermissionFlagsBits.Administrator))
-        return true;
-     member.roles.cache.some(role =>  {
-            if (isOperator(role.id, moduleName, guildID))
-                return true;
-        }
+        return true; 
+     return member.roles.cache.some(role =>  
+            isOperator(role.id, moduleName, guildID)
     );
 
-    return false;
+
 }
 
 module.exports = {checkOperatorship};
