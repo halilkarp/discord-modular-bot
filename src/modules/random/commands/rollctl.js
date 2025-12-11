@@ -20,7 +20,7 @@ module.exports = {
           option
             .setName("attachment")
             .setDescription("Upload a text file")
-            .setRequired(true)
+            .setRequired(false)
         )
     )
     //edit an existing pool
@@ -66,6 +66,13 @@ module.exports = {
     if (sub === "create") {
       try {
         const attachment = interaction.options.getAttachment("attachment");
+        if(!attachment)
+        {
+            let message = access.createPool(poolName, interaction.guildId);
+            interaction.editReply(message);
+            return;
+
+        }
         const result = await fileToDB(
           poolName,
           interaction.guildId,
