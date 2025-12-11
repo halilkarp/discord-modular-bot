@@ -24,7 +24,7 @@ addChannelOption(option=> option.setName("channel").setDescription("channel(requ
 async execute(client, interaction)
 {
     await interaction.deferReply({ ephemeral: true });
-    if(!checkOperatorship(interaction.member, interaction.guildId)){
+    if(!checkOperatorship(interaction.member, interaction.guildId, "logchannel")){
         await interaction.editReply({content: "You are not authorized to use this command."});2
         return;
     }

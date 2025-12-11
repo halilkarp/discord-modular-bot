@@ -3,6 +3,7 @@ const fileToDB = require("./logic/fileToDB.js")
 
 module.exports ={
     access,
-    fileToDB
+    fileToDB,
+    needsOperator : true,
     
 }

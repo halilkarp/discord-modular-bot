@@ -45,6 +45,7 @@ function addItem(poolName, guildID, item) {
   );
   return `Added a new item to ${poolName}.`;
 }
+
 function removeItem(poolName, guildID, item) {
   const poolID = getPoolID(poolName, guildID);
   if (!poolID) return "Pool does not exist.";

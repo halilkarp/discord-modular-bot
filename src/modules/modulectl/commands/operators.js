@@ -22,7 +22,7 @@ addRoleOption(option=> option.setName("role").setDescription("role").setRequired
 async execute(client, interaction)
 {
     await interaction.deferReply({ ephemeral: true });
-    if(!checkOperatorship(interaction.member, interaction.guildId)){
+    if(!checkOperatorship(interaction.member, interaction.guildId, "operators")){
         await interaction.editReply({content: "You are not authorized to use this command."});
         return;
     }

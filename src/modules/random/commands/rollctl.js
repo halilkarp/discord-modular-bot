@@ -54,7 +54,7 @@ module.exports = {
     ),
   async execute(client, interaction) {
     await interaction.deferReply();
-     if(!checkOperatorship(interaction.member, interaction.guildId)){
+     if(!checkOperatorship(interaction.member, interaction.guildId,"random")){
                 await interaction.editReply({content: "You are not authorized to use this command."});
                 return;
             }

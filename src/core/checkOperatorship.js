@@ -1,7 +1,7 @@
 const path = require("path");
 const db = require("@db");
 const {PermissionFlagsBits} = require("discord.js");
-const {isOperator}= require("./logConfig.js")
+const {isOperator}= require("./operatorConfig.js")
 function checkOperatorship(member, guildID, moduleName){
     if(member.guild.ownerId == member.id)
         return true;

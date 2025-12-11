@@ -9,8 +9,7 @@ module.exports = {
       moduleName,
       content,
       customEmbeds = [],
-      files = [],
-      guildId,
+      files = []
     } = payLoad;
     const channel = client.channels.cache.get(channelId);
     if (!channel) {
