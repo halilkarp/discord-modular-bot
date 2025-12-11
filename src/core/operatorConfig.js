@@ -7,7 +7,7 @@ function isOperator(roleID, moduleName, guildID)
             WHERE roleID = ? AND guildID = ? AND moduleName = ?
             LIMIT 1
         `).get(roleID, guildID, moduleName);
-        return row !== null;
+        return row !== undefined;
 }
 
 function getOperators(moduleName, guildID)
