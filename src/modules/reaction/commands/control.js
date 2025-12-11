@@ -52,7 +52,7 @@ module.exports = {
         }
         if(subCommand === "control")
         {
-           if(!checkOperatorship(interaction.member, interaction.guildId, "reactions")){
+           if(!checkOperatorship(interaction.member, interaction.guildId, "reaction")){
                 await interaction.editReply({content: "You are not authorized to use this command."});
                 return;
             }
