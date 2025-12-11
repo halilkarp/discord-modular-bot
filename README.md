@@ -26,7 +26,7 @@ Provides a controlled impersonation system with:
   - `protected` → user cannot be impersonated
 
 All impersonation actions are logged to the configured log channel for the `impersonation` module in that guild (if set).
-### Random Module (NEW)
+### Random Module 
 A fully modular randomizer system that allows creating text pools, modifying them, and posting random unseen items.
 
 #### Commands
@@ -50,11 +50,19 @@ pool: <name>
 action: add | remove
 entry: <text or sentence>
 ```
-- `/rollctl purge` - Completely remove a pool.
-```
-pool: <name>
-pool: <name>
-```
+### Reaction Module
+Allows you to send reaction(s) to people to multiple people via keyword-emoji combinations.
+- `/reactions control `
+   - `action` → `"add"` or `"remove"` 
+   - `keyword` → the keyword to trigger the reactions
+   - `emoji`  → the emoji that willl be reacted to the messages (available for add)
+
+`/reactions list` → Lists all the possible  keyword : emoji combinations
+
+This command detects a message that starts with a keyword in the table for possible reactions, it reacts to last 20 message in chat excluding the author of the keyword trigger. Enabled only for the operators for the module specifically. Possible to target a specific person with the `keyword [target name]` combination.
+    
+
+
 
 ### Module Control (`modulectl`) Module
 
@@ -185,6 +193,15 @@ discord-modular-bot
 │               ├── access.js
 │               ├── rules.js
 │               └── fileToDB.js
+        └── reaction/                 
+│           ├── schema.sql
+│           ├── index.js
+│           ├── commands/
+│           │   ├── control.js
+│           └── logic/
+│               ├── access.js
+│               ├── rules.js
+│               └── reactToMessages.js
 
 ```
 # Module Structure

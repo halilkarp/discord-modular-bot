@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const {checkOperatorship} = require ("@core/checkOperatorship.js");
-const {access, rules} = require("../index")
+const { checkOperatorship } = require("@core/checkOperatorship.js");
+const { access, rules } = require("../index");
 module.exports = {
   name: "react-options",
   description: "List or modify available reacts",
@@ -29,51 +29,70 @@ module.exports = {
             .setName("keyword")
             .setDescription("insert the associated keyword with the reaction")
             .setRequired(true)
-        ).addStringOption(option=>
-            option.setName("emoji").setDescription("emoji name if adding").setRequired(false)
+        )
+        .addStringOption((option) =>
+          option
+            .setName("emoji")
+            .setDescription("emoji name if adding")
+            .setRequired(false)
         )
     ),
-    async execute(client, interaction)
-    {
-        const subCommand = interaction.options.getSubcommand();
-        if(subCommand ==="list")
-        {
-          const reactionList = access.getReactions(interaction.guildId);
-          if(!reactionList)
-          {await interaction.reply("No reactions registered for this guild.")
-            return;
-          }
-          const embed = new EmbedBuilder()
-                  .setTitle("Available Reactions")
-                  .setDescription(reactionList.map((r) => `• **${r.keyword} : ${r.emoji}**`).join("\n"))
-                  .setColor(0x00ae86);
-                await interaction.reply({ embeds: [embed] });
-                return;
-        }
-        if(subCommand === "control")
-        {
-           if(!checkOperatorship(interaction.member, interaction.guildId, "reaction")){
-                await interaction.editReply({content: "You are not authorized to use this command."});
-                return;
-            }
-          const action = interaction.options.getString("action");
-          const keyword = interaction.options.getString("keyword");
-          if(action ==="add")
-          {
-            const emoji = interaction.options.getString("emoji");
-            if(!emoji)
-              {await interaction.reply("Add a valid emote.") 
-                return;}
-            const result = access.addReaction(keyword, emoji, interaction.guildId);
-            await interaction.reply(result);
-            return;
-          }
-           if(action ==="remove")
-          {
-            const result = access.removeReaction(keyword, interaction.guildId);
-            await interaction.reply(result);
-            return;
-          }
-        }
+  async execute(client, interaction) {
+    const subCommand = interaction.options.getSubcommand();
+    if (subCommand === "list") {
+      const reactionList = access.getReactionsForGuild(interaction.guildId);
+
+      if (!reactionList || reactionList.length === 0) {
+        await interaction.reply("No reactions registered for this guild.");
+        return;
+      }
+
+      const grouped = {};
+      for (const row of reactionList) {
+        if (!grouped[row.keyword]) grouped[row.keyword] = [];
+        grouped[row.keyword].push(row.emoji);
+      }
+
+      const description = Object.entries(grouped)
+        .map(([keyword, emojis]) => `• **${keyword}** → ${emojis.join(" ")}`)
+        .join("\n");
+
+      const embed = new EmbedBuilder()
+        .setTitle("Available Reactions")
+        .setDescription(description)
+        .setColor(0x00ae86);
+
+      await interaction.reply({ embeds: [embed] });
+      return;
     }
+
+    if (subCommand === "control") {
+      if (
+        !checkOperatorship(interaction.member, interaction.guildId, "reaction")
+      ) {
+        await interaction.reply({
+          content: "You are not authorized to use this command.",
+          ephemeral: true,
+        });
+        return;
+      }
+      const action = interaction.options.getString("action");
+      const keyword = interaction.options.getString("keyword");
+      if (action === "add") {
+        const emoji = interaction.options.getString("emoji");
+        if (!emoji) {
+          await interaction.reply("Add a valid emote.");
+          return;
+        }
+        const result = access.addReaction(keyword, emoji, interaction.guildId);
+        await interaction.reply({ content: result, ephemeral: true });
+        return;
+      }
+      if (action === "remove") {
+        const result = access.removeReaction(keyword, interaction.guildId);
+        await interaction.reply({ content: result, ephemeral: true });
+        return;
+      }
+    }
+  },
 };

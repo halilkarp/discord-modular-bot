@@ -1,42 +1,38 @@
 const db = require("@db");
-const rules = require("./rules.js");
 
-function getReaction(keyword, guildID) {
-  if (rules.keywordExists(keyword, guildID))
-    return db
-      .prepare("SELECT emoji FROM reactions WHERE keyword = ? AND guildID = ?")
-      .get(keyword, guildID).emoji.toString();
-  return null;
-
+// get reactions for one keyword
+function getReactionsForKeyword(keyword, guildID) {
+  return db
+    .prepare("SELECT emoji FROM reactions WHERE keyword = ? AND guildID = ?")
+    .all(keyword, guildID)
+    .map(r => r.emoji);
 }
 
-function getReactions(guildID) {
-  if (rules.guildHasReaction(guildID))
-    return db
-      .prepare("SELECT * FROM reactions WHERE guildID = ?")
-      .all(guildID);
-  return null;
+// get all reactions in a guild (for listing)
+function getReactionsForGuild(guildID) {
+  return db
+    .prepare("SELECT keyword, emoji FROM reactions WHERE guildID = ?")
+    .all(guildID);
 }
 
 function addReaction(keyword, emoji, guildID) {
-  if (rules.keywordExists(keyword, guildID)) return "Keyword already exists.";
-  if (rules.emojiExists(emoji, guildID)) return "Emoji already exists.";
   db.prepare(
     "INSERT INTO reactions (keyword, emoji, guildID) VALUES (?, ?, ?)"
   ).run(keyword, emoji, guildID);
-  return `Added a new keyword-reaction combination.`;
+
+  return `Added ${emoji} to ${keyword}.`;
 }
 
 function removeReaction(keyword, guildID) {
-  if (!rules.keywordExists(keyword, guildID))
-    return "Keyword already doesn't exist.";
+  db.prepare("DELETE FROM reactions WHERE keyword = ? AND guildID = ?")
+    .run(keyword, guildID);
 
-  db.prepare("DELETE FROM reactions WHERE keyword = ? AND guildID = ?").run(
-    keyword,
-    guildID
-  );
-  return `Removed the ${keyword} keyword.`;
+  return `Removed all reactions for keyword ${keyword}.`;
 }
 
-
-module.exports = {getReaction, getReactions, addReaction, removeReaction}
+module.exports = {
+  getReactionsForKeyword,
+  getReactionsForGuild,
+  addReaction,
+  removeReaction
+};
