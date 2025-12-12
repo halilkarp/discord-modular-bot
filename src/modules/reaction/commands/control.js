@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { checkOperatorship } = require("@core/checkOperatorship.js");
 const { access, rules } = require("../index");
+const logger = require("@core/logger.js")
+
 module.exports = {
   name: "react-options",
   description: "List or modify available reacts",
@@ -39,6 +41,7 @@ module.exports = {
     ),
   async execute(client, interaction) {
     const subCommand = interaction.options.getSubcommand();
+    let logMessage = ``;
     if (subCommand === "list") {
       const reactionList = access.getReactionsForGuild(interaction.guildId);
 
@@ -86,13 +89,17 @@ module.exports = {
         }
         const result = access.addReaction(keyword, emoji, interaction.guildId);
         await interaction.reply({ content: result, ephemeral: true });
-        return;
+        logMessage = result;
+        
       }
       if (action === "remove") {
         const result = access.removeReaction(keyword, interaction.guildId);
+        logMessage = result;
         await interaction.reply({ content: result, ephemeral: true });
-        return;
+        
       }
     }
+    logger.sendLogMessage(interaction.user, interaction.guildId, "reaction",logMessage);
+
   },
 };

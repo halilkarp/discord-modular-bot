@@ -5,5 +5,6 @@ module.exports ={
     access,
     fileToDB,
     needsOperator : true,
+    needsLogging : true
     
 }

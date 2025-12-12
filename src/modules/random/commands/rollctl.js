@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { fileToDB, access } = require("../index");
-const {checkOperatorship} = require ("@core/checkOperatorship.js");
-
+const { checkOperatorship } = require("@core/checkOperatorship.js");
+const logger = require("@core/logger.js");
 module.exports = {
   name: "rollctl",
   description: "rollctl",
@@ -56,22 +56,23 @@ module.exports = {
     ),
   async execute(client, interaction) {
     await interaction.deferReply();
-     if(!checkOperatorship(interaction.member, interaction.guildId,"random")){
-                await interaction.editReply({content: "You are not authorized to use this command."});
-                return;
-            }
+    if (!checkOperatorship(interaction.member, interaction.guildId, "random")) {
+      await interaction.editReply({
+        content: "You are not authorized to use this command.",
+      });
+      return;
+    }
     const sub = interaction.options.getSubcommand();
     const poolName = interaction.options.getString("pool");
-
+    let logMessage = ``;
     if (sub === "create") {
       try {
         const attachment = interaction.options.getAttachment("attachment");
-        if(!attachment)
-        {
-            let message = access.createPool(poolName, interaction.guildId);
-            interaction.editReply(message);
-            return;
+        if (!attachment) {
+          let message = access.createPool(poolName, interaction.guildId);
+          logMessage = message;
 
+          interaction.editReply(message);
         }
         const result = await fileToDB(
           poolName,
@@ -79,23 +80,23 @@ module.exports = {
           attachment.url
         );
         await interaction.editReply(result);
+        logMessage = result;
       } catch (err) {
         console.error(err);
 
         await interaction.followUp(`Failed to create a pool.`);
       }
-      return;
     }
     if (sub === "purge") {
       const result = access.purgePool(poolName, interaction.guildId);
       try {
         await interaction.editReply(result);
+        logMessage = result;
       } catch (err) {
         console.error(err);
 
         await interaction.followUp(`Something went wrong.`);
       }
-      return;
     }
 
     const action = interaction.options.getString("action");
@@ -104,19 +105,26 @@ module.exports = {
       const result = access.addItem(poolName, interaction.guildId, entry);
       try {
         await interaction.editReply(result);
+        logMessage = result;
       } catch (err) {
         console.error(err);
       }
-      return;
     }
     if (action === "remove") {
       const result = access.removeItem(poolName, interaction.guildId, entry);
       try {
         await interaction.editReply(result);
+        logMessage = result;
       } catch (err) {
         console.error(err);
       }
-      return;
     }
+
+    logger.sendLogMessage(
+      interaction.user,
+      interaction.guildId,
+      "random",
+      logMessage
+    );
   },
 };
