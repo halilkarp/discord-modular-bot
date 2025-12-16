@@ -125,7 +125,13 @@ APPLICATION_ID=<your_application_id>
 npm start        # regular mode - runs once, you have to restart manually
 npm run dev      # development mode hot reload- auto-restarts on every file change
 ```
-
+- Recommended to run it through the pm2 daemon process manager the setup for it is also quite simple
+  ```
+   npm install pm2@latest -g   #install pm2
+   pm2 start src/bot.js       #start the bot and it registers an instance of "bot"
+   pm2 restart bot            #quick restart
+   pm2 log                   #shows the runtime console for the bot
+  ```
 
 # Directory Structure
 
